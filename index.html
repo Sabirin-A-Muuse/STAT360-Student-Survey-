@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Feedback Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #1F2D3D;
+    --paper: #E9ECEE;
+    --paper-alt: #DDE2E5;
+    --rule: #B8C0C6;
+    --gold: #B4842A;
+    --pencil: #A24B3C;
+    --green: #3C5C48;
+    --white: #FFFFFF;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.5;
+  }
+
+  .sheet{
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 64px 28px 120px;
+  }
+
+  header{
+    border-bottom: 3px solid var(--ink);
+    padding-bottom: 28px;
+    margin-bottom: 44px;
+  }
+
+  .kicker{
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--green);
+    margin: 0 0 10px;
+  }
+
+  h1{
+    font-family: 'Newsreader', serif;
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1.15;
+    margin: 0 0 14px;
+  }
+
+  header p{
+    font-size: 15.5px;
+    max-width: 54ch;
+    color: #445062;
+    margin: 0;
+  }
+
+  .meta-row{
+    display: flex;
+    gap: 28px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+  }
+
+  .field{
+    margin-bottom: 34px;
+  }
+
+  .field.compact{
+    margin-bottom: 0;
+    flex: 1 1 220px;
+  }
+
+  .q-number{
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 15px;
+    margin-right: 6px;
+  }
+
+  label.q, .field.compact > span{
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .hint{
+    font-size: 13px;
+    color: #5C6B7A;
+    margin: -4px 0 10px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  textarea,
+  select{
+    width: 100%;
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 11px 13px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  textarea{
+    resize: vertical;
+    min-height: 90px;
+  }
+
+  input:focus, textarea:focus, select:focus{
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(60,92,72,0.15);
+  }
+
+  .required{
+    color: var(--pencil);
+    margin-left: 4px;
+  }
+
+  /* scale question */
+  .scale{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .scale-option{
+    flex: 1;
+    text-align: center;
+  }
+
+  .scale-option input{
+    display: block;
+    margin: 0 auto 8px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--green);
+  }
+
+  .scale-option .num{
+    display: block;
+    width: 34px;
+    height: 34px;
+    line-height: 34px;
+    margin: 0 auto 6px;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    font-family: 'Newsreader', serif;
+    font-size: 15px;
+    background: var(--white);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .scale-option input:checked + .num{
+    border-color: var(--green);
+    background: var(--green);
+    color: var(--white);
+  }
+
+  .scale-option label{
+    display: block;
+    cursor: pointer;
+  }
+
+  .scale-option .tag{
+    font-size: 11.5px;
+    color: #5C6B7A;
+    display: block;
+  }
+
+  /* radio / checkbox rows */
+  .choice-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--paper-alt);
+  }
+
+  .choice-row:last-child{ border-bottom: none; }
+
+  .choice-row input{
+    width: 16px;
+    height: 16px;
+    accent-color: var(--green);
+    flex-shrink: 0;
+  }
+
+  .choice-row label{
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  fieldset{
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  legend{
+    padding: 0;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .divider{
+    border: none;
+    border-top: 1px dashed var(--rule);
+    margin: 44px 0;
+  }
+
+  button[type="submit"]{
+    background: var(--ink);
+    color: var(--white);
+    border: none;
+    border-radius: 3px;
+    padding: 15px 30px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  button[type="submit"]:hover{
+    background: var(--green);
+  }
+
+  .submit-row{
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 46px;
+  }
+
+  #status{
+    font-size: 14px;
+    color: var(--green);
+  }
+
+  #status.error{ color: var(--pencil); }
+
+  .confirmation{
+    display: none;
+    text-align: center;
+    padding: 90px 20px;
+  }
+
+  .confirmation.show{ display: block; }
+
+  .confirmation h2{
+    font-family: 'Newsreader', serif;
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .confirmation p{
+    color: #445062;
+    font-size: 15.5px;
+  }
+
+  form.hide{ display: none; }
+
+  .setup-note{
+    max-width: 680px;
+    margin: 0 auto 0;
+    padding: 0 28px 50px;
+    font-size: 13px;
+    color: #5C6B7A;
+  }
+
+  .setup-note summary{
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--green);
+  }
+
+  .setup-note code{
+    background: var(--paper-alt);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 520px){
+    h1{ font-size: 32px; }
+    .sheet{ padding: 44px 20px 90px; }
+    .scale-option .tag{ display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <header>
+    <p class="kicker">End-of-Term Course Feedback</p>
+    <h1>Tell us how the course went.</h1>
+    <p>Your responses are anonymous and help shape how this course is taught next term. It takes about four minutes to complete.</p>
+    <div class="meta-row">
+      <div class="field compact">
+        <span>Course</span>
+        <select id="course" name="Course" required>
+          <option value="" disabled selected>Select a course</option>
+          <option>STAT360</option>
+          <option>STAT353</option>
+          <option>STAT415</option>
+        </select>
+      </div>
+      <div class="field compact">
+        <span>Term</span>
+        <select id="term" name="Term" required>
+          <option value="" disabled selected>Select a term</option>
+          <option>Fall 2026</option>
+          <option>Spring 2026</option>
+          <option>Summer 2026</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <form id="surveyForm">
+
+    <div class="field">
+      <fieldset>
+        <legend><span class="q-number">01</span>How many class sessions did you attend, roughly?</legend>
+      </fieldset>
+      <div class="choice-row">
+        <input type="radio" id="att1" name="Attendance" value="Nearly all" required>
+        <label for="att1">Nearly all of them</label>
+      </div>
+      <div class="choice-row">
+        <input type="radio" id="att2" name="Attendance" value="Most">
+        <label for="att2">Most of them</label>
+      </div>
+      <div class="choice-row">
+        <input type="radio" id="att3" name="Attendance" value="About half">
+        <label for="att3">About half</label>
+      </div>
+      <div class="choice-row">
+        <input type="radio" id="att4" name="Attendance" value="Fewer than half">
+        <label for="att4">Fewer than half</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="q" for="pace"><span class="q-number">02</span>The pace of the course was</label>
+      <select id="pace" name="Pace" required>
+        <option value="" disabled selected>Choose one</option>
+        <option>Too slow</option>
+        <option>A little slow</option>
+        <option>About right</option>
+        <option>A little fast</option>
+        <option>Too fast</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <fieldset>
+        <legend><span class="q-number">03</span>How clearly did the instructor explain difficult concepts?</legend>
+      </fieldset>
+      <div class="scale" role="radiogroup">
+        <div class="scale-option">
+          <input type="radio" id="clarity1" name="Clarity" value="1" required>
+          <span class="num">1</span>
+          <label for="clarity1"><span class="tag">Not clear</span></label>
+        </div>
+        <div class="scale-option">
+          <input type="radio" id="clarity2" name="Clarity" value="2">
+          <span class="num">2</span>
+          <label for="clarity2"></label>
+        </div>
+        <div class="scale-option">
+          <input type="radio" id="clarity3" name="Clarity" value="3">
+          <span class="num">3</span>
+          <label for="clarity3"><span class="tag">Somewhat</span></label>
+        </div>
+        <div class="scale-option">
+          <input type="radio" id="clarity4" name="Clarity" value="4">
+          <span class="num">4</span>
+          <label for="clarity4"></label>
+        </div>
+        <div class="scale-option">
+          <input type="radio" id="clarity5" name="Clarity" value="5">
+          <span class="num">5</span>
+          <label for="clarity5"><span class="tag">Very clear</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <fieldset>
+        <legend><span class="q-number">04</span>Which parts of the course helped you learn most? <span style="font-weight:400; color:#5C6B7A;">(check all that apply)</span></legend>
+      </fieldset>
+      <div class="choice-row">
+        <input type="checkbox" id="help1" name="Helpful_Lectures" value="Lectures">
+        <label for="help1">Lectures</label>
+      </div>
+      <div class="choice-row">
+        <input type="checkbox" id="help2" name="Helpful_Labs" value="Labs / hands-on work">
+        <label for="help2">Labs / hands-on work</label>
+      </div>
+      <div class="choice-row">
+        <input type="checkbox" id="help3" name="Helpful_ProblemSets" value="Problem sets">
+        <label for="help3">Problem sets</label>
+      </div>
+      <div class="choice-row">
+        <input type="checkbox" id="help4" name="Helpful_Discussion" value="Discussion sections">
+        <label for="help4">Discussion sections</label>
+      </div>
+      <div class="choice-row">
+        <input type="checkbox" id="help5" name="Helpful_OfficeHours" value="Office hours">
+        <label for="help5">Office hours</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="q" for="workload"><span class="q-number">05</span>Compared to other courses at this level, the workload was</label>
+      <select id="workload" name="Workload" required>
+        <option value="" disabled selected>Choose one</option>
+        <option>Much lighter</option>
+        <option>Somewhat lighter</option>
+        <option>About the same</option>
+        <option>Somewhat heavier</option>
+        <option>Much heavier</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="q" for="best"><span class="q-number">06</span>What worked well in this course?</label>
+      <textarea id="best" name="What_Worked" placeholder="A specific example is more useful to us than general praise."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="q" for="change"><span class="q-number">07</span>What's one thing you'd change?</label>
+      <textarea id="change" name="What_To_Change" placeholder="Be as specific as you can."></textarea>
+    </div>
+
+    <div class="field">
+      <fieldset>
+        <legend><span class="q-number">08</span>Would you recommend this course to another student?</legend>
+      </fieldset>
+      <div class="choice-row">
+        <input type="radio" id="rec1" name="Recommend" value="Yes" required>
+        <label for="rec1">Yes</label>
+      </div>
+      <div class="choice-row">
+        <input type="radio" id="rec2" name="Recommend" value="Depends on the student">
+        <label for="rec2">Depends on the student</label>
+      </div>
+      <div class="choice-row">
+        <input type="radio" id="rec3" name="Recommend" value="No">
+        <label for="rec3">No</label>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="field" style="margin-bottom: 0;">
+      <label class="q" for="other">Anything else you'd like the instructor to know?</label>
+      <div class="hint">Optional — this one is not shared with the registrar.</div>
+      <textarea id="other" name="Other_Comments"></textarea>
+    </div>
+
+    <div class="submit-row">
+      <button type="submit">Submit feedback</button>
+      <span id="status"></span>
+    </div>
+  </form>
+
+  <div class="confirmation" id="confirmation">
+    <h2>Thanks — that's recorded.</h2>
+    <p>Your feedback has been submitted anonymously.</p>
+  </div>
+</div>
+
+<details class="setup-note">
+  <summary>Instructor setup: connect this form to Google Sheets</summary>
+  <p style="margin-top:12px;">
+    This page needs a free Google Apps Script "Web App" to act as the bridge to your Sheet. One-time setup, about five minutes:
+  </p>
+  <ol>
+    <li>Create a new Google Sheet. Add a header row matching the field names in this form (e.g. <code>Course, Term, Attendance, Pace, Clarity, ...</code>) — or just let the script create headers automatically on first submit.</li>
+    <li>In the Sheet, go to <code>Extensions → Apps Script</code>.</li>
+    <li>Replace the default code with a script that reads <code>e.parameter</code> from the POST request and appends a row via <code>SpreadsheetApp.getActiveSheet().appendRow(...)</code>.</li>
+    <li>Click <code>Deploy → New deployment → Web app</code>. Set "Execute as: Me" and "Who has access: Anyone", then deploy and copy the resulting URL.</li>
+    <li>In this HTML file, find the line <code>const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";</code> near the bottom and paste your URL in.</li>
+  </ol>
+  <p>Once that's in place, every submission appears as a new row in your Sheet in real time. Pair this with <code>results.html</code> to see the responses plotted out.</p>
+</details>
+
+<script>
+  const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+
+  const form = document.getElementById('surveyForm');
+  const statusEl = document.getElementById('status');
+  const confirmation = document.getElementById('confirmation');
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    if (SCRIPT_URL.indexOf('PASTE_YOUR_APPS_SCRIPT_URL_HERE') !== -1) {
+      statusEl.textContent = 'Not connected to a Google Sheet yet — see the setup note below.';
+      statusEl.classList.add('error');
+      return;
+    }
+
+    const formData = new FormData(form);
+    formData.append('Course', document.getElementById('course').value);
+    formData.append('Term', document.getElementById('term').value);
+    formData.append('Timestamp', new Date().toISOString());
+
+    statusEl.classList.remove('error');
+    statusEl.textContent = 'Submitting…';
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+      form.classList.add('hide');
+      confirmation.classList.add('show');
+    } catch (err) {
+      statusEl.textContent = 'Something went wrong — please try again.';
+      statusEl.classList.add('error');
+    }
+  });
+</script>
+
+</body>
+</html>
