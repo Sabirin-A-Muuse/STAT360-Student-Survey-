@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Feedback — Results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  :root{
+    --ink: #1F2D3D;
+    --paper: #E9ECEE;
+    --paper-alt: #DDE2E5;
+    --rule: #B8C0C6;
+    --gold: #B4842A;
+    --pencil: #A24B3C;
+    --green: #3C5C48;
+    --white: #FFFFFF;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.5;
+  }
+
+  .sheet{
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 64px 28px 110px;
+  }
+
+  header{
+    border-bottom: 3px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .kicker{
+    font-size: 13px;
+    color: var(--green);
+    margin: 0 0 10px;
+  }
+
+  h1{
+    font-family: 'Newsreader', serif;
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  .controls{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .controls label{
+    font-size: 13px;
+    color: #5C6B7A;
+  }
+
+  select{
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 9px 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px;
+    color: var(--ink);
+  }
+
+  .summary-row{
+    display: flex;
+    gap: 28px;
+    margin-bottom: 46px;
+    flex-wrap: wrap;
+  }
+
+  .summary-card{
+    flex: 1 1 160px;
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 18px 20px;
+  }
+
+  .summary-card .num{
+    font-family: 'Newsreader', serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .summary-card .label{
+    font-size: 12.5px;
+    color: #5C6B7A;
+  }
+
+  .panel{
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 26px 26px 20px;
+    margin-bottom: 30px;
+  }
+
+  .panel h2{
+    font-family: 'Newsreader', serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: 19px;
+    margin: 0 0 4px;
+  }
+
+  .panel .sub{
+    font-size: 13px;
+    color: #5C6B7A;
+    margin: 0 0 18px;
+  }
+
+  .grid-two{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  canvas{
+    max-height: 280px;
+  }
+
+  .comments{
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+
+  .comment{
+    padding: 12px 0;
+    border-bottom: 1px solid var(--paper-alt);
+    font-size: 14.5px;
+  }
+
+  .comment:last-child{ border-bottom: none; }
+
+  .comment .tag{
+    display: inline-block;
+    font-size: 11px;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
+  #loadState{
+    text-align: center;
+    padding: 90px 20px;
+    color: #5C6B7A;
+  }
+
+  #loadState h2{
+    font-family: 'Newsreader', serif;
+    font-size: 24px;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  #dashboard{ display: none; }
+  #dashboard.show{ display: block; }
+
+  .setup-note{
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 28px 50px;
+    font-size: 13px;
+    color: #5C6B7A;
+  }
+
+  .setup-note summary{
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--green);
+  }
+
+  .setup-note code{
+    background: var(--paper-alt);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 640px){
+    .grid-two{ grid-template-columns: 1fr; }
+    h1{ font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <header>
+    <div>
+      <p class="kicker">Course Feedback</p>
+      <h1>Results dashboard</h1>
+    </div>
+    <div class="controls">
+      <label for="courseFilter">Course</label>
+      <select id="courseFilter">
+        <option value="ALL">All courses</option>
+        <option value="STAT360">STAT360</option>
+        <option value="STAT353">STAT353</option>
+        <option value="STAT415">STAT415</option>
+      </select>
+    </div>
+  </header>
+
+  <div id="loadState">
+    <h2>Loading responses…</h2>
+    <p>Pulling the latest data from the sheet.</p>
+  </div>
+
+  <div id="dashboard">
+    <div class="summary-row">
+      <div class="summary-card">
+        <div class="num" id="statCount">–</div>
+        <div class="label">Responses</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="statClarity">–</div>
+        <div class="label">Avg. clarity (out of 5)</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="statRecommend">–</div>
+        <div class="label">Would recommend</div>
+      </div>
+    </div>
+
+    <div class="grid-two">
+      <div class="panel">
+        <h2>Attendance</h2>
+        <p class="sub">How much of the course students attended</p>
+        <canvas id="chartAttendance"></canvas>
+      </div>
+      <div class="panel">
+        <h2>Pace</h2>
+        <p class="sub">Was the course too fast, too slow, or about right</p>
+        <canvas id="chartPace"></canvas>
+      </div>
+    </div>
+
+    <div class="grid-two">
+      <div class="panel">
+        <h2>Clarity of explanations</h2>
+        <p class="sub">Self-rated 1 (not clear) to 5 (very clear)</p>
+        <canvas id="chartClarity"></canvas>
+      </div>
+      <div class="panel">
+        <h2>Workload</h2>
+        <p class="sub">Compared to other courses at this level</p>
+        <canvas id="chartWorkload"></canvas>
+      </div>
+    </div>
+
+    <div class="grid-two">
+      <div class="panel">
+        <h2>What helped most</h2>
+        <p class="sub">Share of students selecting each option</p>
+        <canvas id="chartHelpful"></canvas>
+      </div>
+      <div class="panel">
+        <h2>Would recommend this course</h2>
+        <p class="sub">To another student</p>
+        <canvas id="chartRecommend"></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>What students said</h2>
+      <p class="sub">Free-response answers to "what's one thing you'd change?"</p>
+      <div class="comments" id="commentsList"></div>
+    </div>
+  </div>
+</div>
+
+<details class="setup-note">
+  <summary>Instructor setup: connect this page to your Google Sheet</summary>
+  <p style="margin-top:12px;">
+    This dashboard reads your responses straight from the same Sheet the survey writes to. One-time setup:
+  </p>
+  <ol>
+    <li>Open the Google Sheet the survey feeds into.</li>
+    <li>Go to <code>File → Share → Publish to web</code>.</li>
+    <li>Under "Link", choose the specific sheet/tab with your responses, set the format dropdown to <code>Comma-separated values (.csv)</code>, then click <code>Publish</code>.</li>
+    <li>Copy the URL it gives you.</li>
+    <li>In this file, find <code>const CSV_URL = "PASTE_YOUR_PUBLISHED_CSV_URL_HERE";</code> near the bottom and paste it in.</li>
+  </ol>
+  <p>The dashboard re-reads that URL on every page load, so it always reflects the latest submissions. It expects the same column names the survey form sends: <code>Course, Term, Attendance, Pace, Clarity, Helpful_Lectures, Helpful_Labs, Helpful_ProblemSets, Helpful_Discussion, Helpful_OfficeHours, Workload, What_Worked, What_To_Change, Recommend, Other_Comments</code>.</p>
+</details>
+
+<script>
+  const CSV_URL = "https://script.google.com/macros/s/AKfycbyBQtEXHHgxvhoIOUI6B7d0q08YdEuE3HffI8WujfXbuLH4C2L0EcFPRXio70X59TQFVA/exec";
+
+  const loadState = document.getElementById('loadState');
+  const dashboard = document.getElementById('dashboard');
+  const courseFilter = document.getElementById('courseFilter');
+
+  let allRows = [];
+  let charts = {};
+
+  const palette = {
+    ink: '#1F2D3D', green: '#3C5C48', gold: '#B4842A', pencil: '#A24B3C',
+    slate: '#6B8299', paperAlt: '#DDE2E5'
+  };
+  const seriesColors = [palette.green, palette.gold, palette.slate, palette.pencil, palette.ink, '#8CA3A0'];
+
+  function baseOptions(extra){
+    return Object.assign({
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: palette.paperAlt } },
+        x: { grid: { display: false } }
+      }
+    }, extra || {});
+  }
+
+  function countBy(rows, field, order){
+    const counts = {};
+    order.forEach(o => counts[o] = 0);
+    rows.forEach(r => {
+      const v = (r[field] || '').trim();
+      if (!v) return;
+      counts[v] = (counts[v] || 0) + 1;
+    });
+    return order.map(o => counts[o] || 0);
+  }
+
+  function renderBar(ctx, labels, data, color){
+    return new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: color || palette.green, borderRadius: 3, maxBarThickness: 46 }] },
+      options: baseOptions()
+    });
+  }
+
+  function renderHorizontalBar(ctx, labels, data){
+    return new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: seriesColors, borderRadius: 3 }] },
+      options: baseOptions({
+        indexAxis: 'y',
+        scales: { x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: palette.paperAlt } }, y: { grid: { display: false } } }
+      })
+    });
+  }
+
+  function renderDonut(ctx, labels, data){
+    return new Chart(ctx, {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data, backgroundColor: seriesColors }] },
+      options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'IBM Plex Sans' } } } } }
+    });
+  }
+
+  function destroyCharts(){
+    Object.values(charts).forEach(c => c && c.destroy());
+    charts = {};
+  }
+
+  function renderComments(rows){
+    const list = document.getElementById('commentsList');
+    const withComments = rows.filter(r => (r['What_To_Change'] || '').trim());
+    if (withComments.length === 0){
+      list.innerHTML = '<p style="color:#5C6B7A; font-size:14.5px;">No written responses yet for this filter.</p>';
+      return;
+    }
+    list.innerHTML = withComments.slice(0, 40).map(r => {
+      const course = (r['Course'] || '').trim();
+      const text = (r['What_To_Change'] || '').trim();
+      return `<div class="comment"><span class="tag">${course}</span><br>${escapeHtml(text)}</div>`;
+    }).join('');
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function renderDashboard(rows){
+    destroyCharts();
+
+    document.getElementById('statCount').textContent = rows.length;
+
+    const clarityVals = rows.map(r => parseFloat(r['Clarity'])).filter(n => !isNaN(n));
+    const avgClarity = clarityVals.length ? (clarityVals.reduce((a,b) => a+b, 0) / clarityVals.length) : 0;
+    document.getElementById('statClarity').textContent = clarityVals.length ? avgClarity.toFixed(1) : '–';
+
+    const recYes = rows.filter(r => (r['Recommend'] || '').trim() === 'Yes').length;
+    document.getElementById('statRecommend').textContent = rows.length ? Math.round((recYes / rows.length) * 100) + '%' : '–';
+
+    const attOrder = ['Nearly all', 'Most', 'About half', 'Fewer than half'];
+    charts.attendance = renderBar(
+      document.getElementById('chartAttendance'),
+      attOrder,
+      countBy(rows, 'Attendance', attOrder),
+      palette.green
+    );
+
+    const paceOrder = ['Too slow', 'A little slow', 'About right', 'A little fast', 'Too fast'];
+    charts.pace = renderBar(
+      document.getElementById('chartPace'),
+      paceOrder,
+      countBy(rows, 'Pace', paceOrder),
+      palette.slate
+    );
+
+    const clarityOrder = ['1','2','3','4','5'];
+    charts.clarity = renderBar(
+      document.getElementById('chartClarity'),
+      clarityOrder,
+      countBy(rows, 'Clarity', clarityOrder),
+      palette.gold
+    );
+
+    const workloadOrder = ['Much lighter', 'Somewhat lighter', 'About the same', 'Somewhat heavier', 'Much heavier'];
+    charts.workload = renderBar(
+      document.getElementById('chartWorkload'),
+      workloadOrder,
+      countBy(rows, 'Workload', workloadOrder),
+      palette.pencil
+    );
+
+    const helpfulFields = [
+      ['Helpful_Lectures', 'Lectures'],
+      ['Helpful_Labs', 'Labs'],
+      ['Helpful_ProblemSets', 'Problem sets'],
+      ['Helpful_Discussion', 'Discussion'],
+      ['Helpful_OfficeHours', 'Office hours']
+    ];
+    const helpfulCounts = helpfulFields.map(([field]) => rows.filter(r => (r[field] || '').trim()).length);
+    charts.helpful = renderHorizontalBar(
+      document.getElementById('chartHelpful'),
+      helpfulFields.map(f => f[1]),
+      helpfulCounts
+    );
+
+    const recOrder = ['Yes', 'Depends on the student', 'No'];
+    charts.recommend = renderDonut(
+      document.getElementById('chartRecommend'),
+      recOrder,
+      countBy(rows, 'Recommend', recOrder)
+    );
+
+    renderComments(rows);
+
+    loadState.style.display = 'none';
+    dashboard.classList.add('show');
+  }
+
+  function applyFilter(){
+    const course = courseFilter.value;
+    const rows = course === 'ALL' ? allRows : allRows.filter(r => (r['Course'] || '').trim() === course);
+    renderDashboard(rows);
+  }
+
+  courseFilter.addEventListener('change', applyFilter);
+
+  function showError(message){
+    loadState.innerHTML = `<h2>Couldn't load responses</h2><p>${message}</p>`;
+  }
+
+  if (CSV_URL.indexOf('PASTE_YOUR_PUBLISHED_CSV_URL_HERE') !== -1){
+    showError('This dashboard isn\'t connected to a sheet yet — see the setup note below.');
+  } else {
+    Papa.parse(CSV_URL, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results){
+        allRows = results.data;
+        if (allRows.length === 0){
+          showError('The sheet is connected but has no responses yet.');
+          return;
+        }
+        applyFilter();
+      },
+      error: function(){
+        showError('Check that the CSV URL is correct and publicly published.');
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
